@@ -1,0 +1,23 @@
+<div class="container">
+    <h1>Vehicles</h1>
+    <table class="table table-sm table-striped">
+        <tr>
+            <th>Id</th>
+            <th>Make</th>
+            <th>Model</th>
+            <th>Contact Name</th>
+            <th></th>
+        </tr>
+        <tr *ngFor="let vehicle of vehicles">
+            <td>{{vehicle.id}}</td>
+            <td>{{vehicle.make.name}}</td>
+            <td>{{vehicle.model.name}}</td>
+            <td>{{vehicle.contact.name}}</td>
+            <td>
+                <a [routerLink]="['/vehicles', vehicle.id]">
+                   View Detail
+                </a>
+            </td>
+        </tr>
+    </table>
+ </div>

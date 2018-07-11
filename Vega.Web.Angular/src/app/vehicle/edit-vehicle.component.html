@@ -1,0 +1,51 @@
+<div  class="alert alert-danger" *ngIf="errMessage">{{errMessage}}</div>
+<section class="mt-5 w-50">
+    <h3 class="mb-3">Edit Vehicle</h3>
+    <form class="form-horizontal" novalidate #frm="ngForm" (submit)="submit()">
+        <div class="form-group">
+            <label class="control-label" for="make">Make</label>
+            <select class="form-control" name="make" (change)="onMakeChange()" [(ngModel)]="saveVehicle.makeId" required #make="ngModel">
+                <option value=""></option>
+                <option *ngFor="let m of makes" [value]="m.id">{{m.name}}</option>
+            </select>
+            <div class="alert alert-danger" *ngIf="make.touched && !make.valid">Please specify a make.</div>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="model">Model</label>
+            <select class="form-control" name="model" [(ngModel)]="saveVehicle.modelId" required #model="ngModel">
+                <option value=""></option>
+                <option *ngFor="let m of models" [value]="m.id">{{m.name}}</option>
+            </select>
+            <div class="alert alert-danger" *ngIf="model.touched && !model.valid">Please specify a model.</div>
+        </div>
+       <div class="form-group">
+            <label class="control-label">Is this vehicle registered? </label>
+            <label><input type="radio" [value]="true" name="register" [(ngModel)]="saveVehicle.registered"> Yes</label>
+            <label><input type="radio" [value]="false" name="register" [(ngModel)]="saveVehicle.registered"> No</label>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="features">Features</label>
+            <select name="features" class="form-control" multiple size=5 [(ngModel)]="saveVehicle.featureIds">
+                <option *ngFor="let feature of features" [value]="feature.id">{{feature.name}}</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="contactName">Contact Name</label>
+            <input type="text" name="contactName" class="form-control" [(ngModel)]="saveVehicle.contact.name" required #contactName="ngModel" />
+            <div class="alert alert-danger" *ngIf="contactName.touched && !contactName.valid">Please specify a contact name.</div>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="contactPhone">Contact Phone</label>
+            <input type="tel" name="contactPhone" class="form-control" [(ngModel)]="saveVehicle.contact.phone" required #contactPhone="ngModel" />
+            <div class="alert alert-danger" *ngIf="contactPhone.touched && !contactPhone.valid">Please specify a contact phone.</div>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="contactEmail">Contact Email</label>
+            <input type="email" name="contactEmail" class="form-control" [(ngModel)]="saveVehicle.contact.email"/>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary" [disabled]="!frm.valid">Save</button>
+            <button type="button" class="btn btn-danger" *ngIf="saveVehicle.id" (click)="delete()">Delete</button>
+        </div>
+    </form>
+</section>

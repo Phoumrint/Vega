@@ -1,0 +1,24 @@
+<div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">        
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+  
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="['/']">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-toggle="dropdown">
+                        Vehicle
+                    </a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" [routerLink]="['vehicles/new']">New Vehicle</a>
+                        <a class="dropdown-item" [routerLink]="['vehicles']">List Vehicles</a>
+                    </div>
+                </li>              
+            </ul>
+        </div>
+    </nav>
+</div>  
