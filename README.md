@@ -15,8 +15,9 @@ From Visual Studio Code
 - Specify parent directory for local repo.
 - The local repo is stored in Vega folder under the parent folder.
 
-# Pre-requisite
-SQL Server must be installed in order to run the web application.
+# Pre-requisite installation
+- .Net Core 2.0 SDK
+- SQL Server
 
 # Building and running projects
 - Open Vega folder from VS Code
