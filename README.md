@@ -19,13 +19,14 @@ From Visual Studio Code
 SQL Server must be installed in order to run the web application.
 
 # Building and running projects
-Open Vega folder from VS Code
-From Integrated Terminal, change directory to Vega.API
-Enter "dotnet restore"
-Update SQL Server name under DefaultConnection in Vega.API\appsetings.json file
-Run the server with command "dotnet run"
-Add a new integrated terminal
-From the second terminal, change directory to Vega.Web.Angular or Vega.Web.React
-Enter "npm install"
-Enter "npm start"
-Open a web browser and navigate to "http://localhost:4200"
+- Open Vega folder from VS Code
+- From Integrated Terminal, change directory to Vega.API
+- Enter "dotnet restore"
+- Update SQL Server name under DefaultConnection in Vega.API\appsetings.json file
+- Run the server with command "dotnet run"
+
+- Add a new integrated terminal
+- From the second terminal, change directory to Vega.Web.Angular or Vega.Web.React
+- Enter "npm install"
+- Enter "npm start"
+- Open a web browser and navigate to "http://localhost:4200"
