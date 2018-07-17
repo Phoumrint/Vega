@@ -1,120 +1,79 @@
 import React, {Component} from 'react';
 
 class EditVehicle extends Component {
-    /*
-    makes: Make[];
-    models: Model[];
-    features: Feature[];
-    saveVehicle: SaveVehicle;
-
-    constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private vehicleService: VehicleService) {
-        this.saveVehicle = new SaveVehicle();
-        this.saveVehicle.featureIds = [];
-        this.route.params.subscribe(p => this.saveVehicle.id = +p['id']);
-    }
-
-    ngOnInit(): void {
-        const requests: Observable<any>[] = [
-            this.vehicleService.getMakes(),
-            this.vehicleService.getFeatures()
-        ];
-
-        // If vehicle id is specified, it is for editing; otherwise it is for new vehicle
-        if (this.saveVehicle.id) {
-            requests.push(this.vehicleService.getVehicle(this.saveVehicle.id));
-        }
-        forkJoin(requests).subscribe(data => {
-            this.makes = data[0];
-            this.features = data[1];
-            if (this.saveVehicle.id) {
-                this.populateVehicle(data[2]);
-                this.populateModels();
-            }
-        }, err => {
-            if (err.status === 404) {
-                this.router.navigate(['']);
-            }
-        });
-     }
-
-    onMakeChange() {
-        this.populateModels();
-    }
-
-    submit() {
-        let result: Observable<Vehicle>;
-        if (this.saveVehicle.id) {
-            // Update
-            result = this.vehicleService.putVehicle(this.saveVehicle);
-        } else {
-            // Create
-            result = this.vehicleService.postVehicle(this.saveVehicle);
-        }
-        result.subscribe((vehicle: Vehicle) => {
-            this.router.navigate(['vehicles']);
-        });
-   }
-
-    delete()  {
-        if (confirm('Delete this vehicle?')) {
-            this.vehicleService.deleteVehicle(this.saveVehicle.id)
-                .subscribe(r => {
-                    this.router.navigate(['vehicles']);
-                });
-        }
-    }
-
-    private populateVehicle(vehicle: Vehicle) {
-        this.saveVehicle.id = vehicle.id;
-        this.saveVehicle.makeId = vehicle.make.id;
-        this.saveVehicle.modelId = vehicle.model.id;
-        this.saveVehicle.registered = vehicle.registered;
-        this.saveVehicle.contact = vehicle.contact;
-        vehicle.features.forEach(f => this.saveVehicle.featureIds.push(f.id));
-    }
-
-    private populateModels() {
-        // tslint:disable-next-line:triple-equals
-        const selectedMake = this.makes.find(make => this.saveVehicle.makeId == make.id);
-        if (selectedMake) {
-            this.models = selectedMake.models;
-        } else {
-            this.models = [];
-        }
-    }
-    */
-   constructor() {
+    constructor(props) {
         super();
         this.state = {
             baseUrl: 'http://localhost:5000',
             makeUrl: '',
             featureUrl: '',
-            vehicleUrl: '',
+            vehiclesUrl: '',
             makes: [],
             models: [],
             features: [],
             saveVehicle: {}
         };
         this.state.makeUrl = this.state.baseUrl + '/api/makes';
+        this.state.modelUrl = this.state.baseUrl + '/api/models';
+        this.state.featureUrl = this.state.baseUrl + '/api/features';
+        this.state.vehiclesUrl = this.state.vehicleUrl + '/api/vehicles';
     }
 
     componentDidMount() {
+        // Load makes
         fetch(this.state.makeUrl)
         .then(resp => resp.json())
         .then(makes => {
           this.setState({makes: makes});
         });
+ 
+        // Load features
+        fetch(this.state.featureUrl)
+        .then(resp => resp.json())
+        .then(features => {
+          this.setState({features: features});
+        });
+
+        if (this.state.id) {
+            const vehicleUrl =  `${this.state.vehiclesUrl}/${this.state.id}`;
+
+            fetch(vehicleUrl)
+            .then(resp => resp.json())
+            .then(vehicle => {
+                const saveVehicle = this.getSaveVehicle(vehicle);
+                this.setState({saveVehicle: saveVehicle});
+            });
     
+        }
     }
 
-    onSubmit() {
+    getSaveVehicle(vehicle) {
+        console.log('Loaded Vehicle', vehicle);
+    }
 
+    onSubmit = () => {
+        console.log('SaveVehicle', this.state.saveVehicle);
     }
 
     onDelete()  {
+    }
+
+    onChange = (event) => {
+        const name = event.target.name;
+        const val = event.target.value;
+        console.log('Name', name);
+        console.log('Value', val);
+        console.log('this', this);
+    }
+
+    onMakeChange = (event) => {
+        const makeId = event.target.value;
+        const selectedMake = this.state.makes.find(make => makeId == make.id);
+        if (selectedMake) {
+            this.setState({models: selectedMake.models});
+        } else {
+            this.setState({models: []});
+        }
     }
 
     render() {
@@ -125,73 +84,57 @@ class EditVehicle extends Component {
                     <form>
                         <div className="form-group">
                             <label className="control-label" htmlFor="make">Make</label>
-                            <select className="form-control" name="make" required>
+                            <select className="form-control" name="make" required onChange={this.onMakeChange}>
                                 <option value=""></option>
                                 { this.state.makes.map(
                                     make => 
                                     <option key={make.id} value={make.id}>{make.name}</option>
                                 )}
-
-                             </select>
-                            </div>
-
-                        <button type="button" className='btn btn-primary' onClick={this.onSubmit}>Save</button>{' '}
-                        <button type="button" className='btn btn-danger' onClick={this.onDelete}>Delete</button>
-                    </form>
-                </section>
-                { /*
-                <div  class="alert alert-danger" *ngIf="errMessage">{{errMessage}}</div>
-                <section class="mt-5 w-50">
-                    <h3 class="mb-3">Edit Vehicle</h3>
-                    <form class="form-horizontal" novalidate #frm="ngForm" (submit)="submit()">
-                        <div class="form-group">
-                            <label class="control-label" for="make">Make</label>
-                            <select class="form-control" name="make" (change)="onMakeChange()" [(ngModel)]="saveVehicle.makeId" required #make="ngModel">
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="control-label" htmlFor="model">Model</label>
+                            <select className="form-control" name="model" required>
                                 <option value=""></option>
-                                <option *ngFor="let m of makes" [value]="m.id">{{m.name}}</option>
-                            </select>
-                            <div class="alert alert-danger" *ngIf="make.touched && !make.valid">Please specify a make.</div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label" for="model">Model</label>
-                            <select class="form-control" name="model" [(ngModel)]="saveVehicle.modelId" required #model="ngModel">
-                                <option value=""></option>
-                                <option *ngFor="let m of models" [value]="m.id">{{m.name}}</option>
-                            </select>
-                            <div class="alert alert-danger" *ngIf="model.touched && !model.valid">Please specify a model.</div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label">Is this vehicle registered? </label>
-                            <label><input type="radio" [value]="true" name="register" [(ngModel)]="saveVehicle.registered"> Yes</label>
-                            <label><input type="radio" [value]="false" name="register" [(ngModel)]="saveVehicle.registered"> No</label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label" for="features">Features</label>
-                            <select name="features" class="form-control" multiple size=5 [(ngModel)]="saveVehicle.featureIds">
-                                <option *ngFor="let feature of features" [value]="feature.id">{{feature.name}}</option>
+                                { this.state.models.map(
+                                    model => 
+                                    <option key={model.id} value={model.id}>{model.name}</option>
+                                )}
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label class="control-label" for="contactName">Contact Name</label>
-                            <input type="text" name="contactName" class="form-control" [(ngModel)]="saveVehicle.contact.name" required #contactName="ngModel" />
-                            <div class="alert alert-danger" *ngIf="contactName.touched && !contactName.valid">Please specify a contact name.</div>
+                        <div className="form-group">
+                            <label className="control-label">Is this vehicle registered?</label>
+                            <label><input type="radio" name="register" />Yes</label>
+                            <label><input type="radio" name="register" />No</label>
                         </div>
-                        <div class="form-group">
-                            <label class="control-label" for="contactPhone">Contact Phone</label>
-                            <input type="tel" name="contactPhone" class="form-control" [(ngModel)]="saveVehicle.contact.phone" required #contactPhone="ngModel" />
-                            <div class="alert alert-danger" *ngIf="contactPhone.touched && !contactPhone.valid">Please specify a contact phone.</div>
+                        <div className="form-group">
+                            <label className="control-label" htmlFor="features">Features</label>
+                            <select name="features" className="form-control" multiple size='5'>
+                                { this.state.features.map(
+                                    feature => 
+                                    <option key={feature.id} value={feature.id}>{feature.name}</option>
+                                )}
+                            </select>
                         </div>
-                        <div class="form-group">
-                            <label class="control-label" for="contactEmail">Contact Email</label>
-                            <input type="email" name="contactEmail" class="form-control" [(ngModel)]="saveVehicle.contact.email"/>
+                        <div className="form-group">
+                            <label className="control-label" htmlFor="contactName">Contact Name</label>
+                            <input type="text" name="contactName" className="form-control" required />
+                        </div>
+                        <div className="form-group">
+                            <label className="control-label" htmlFor="contactPhone">Contact Phone</label>
+                            <input type="tel" name="contactPhone" className="form-control" required />
+                        </div>
+                        <div className="form-group">
+                            <label className="control-label" htmlFor="contactEmail">Contact Email</label>
+                            <input type="email" name="contactEmail" className="form-control" onChange={this.onChange} />
                         </div>
                         <div>
-                            <button type="submit" class="btn btn-primary" [disabled]="!frm.valid">Save</button>
-                            <button type="button" class="btn btn-danger" *ngIf="saveVehicle.id" (click)="delete()">Delete</button>
+                            <button type="button" className='btn btn-primary' onClick={this.onSubmit}>Save</button>
+                            <span> </span>
+                            <button type="button" className='btn btn-danger' onClick={this.onDelete}>Delete</button>
                         </div>
                     </form>
                 </section>
-                */ }
             </div>
         );
     }

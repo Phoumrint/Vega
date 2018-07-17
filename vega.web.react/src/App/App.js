@@ -1,12 +1,11 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {Switch, Route} from 'react-router-dom';
 
 import Navigation from './Navigation';
 import ListVehicles from '../Vehicle/ListVehicles';
 import EditVehicle from '../Vehicle/EditVehicle';
 
-class App extends Component {
-  render() {
+const App = () => {
     return (
       <div className='container'>
         <Navigation />
@@ -20,7 +19,6 @@ class App extends Component {
         </div>
       </div>
     );
-  }
 }
 
 export default App;

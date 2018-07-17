@@ -11,7 +11,6 @@ import { EditVehicleComponent } from '../vehicle/edit-vehicle.component';
 import { HomeComponent } from './home.component';
 import { VehicleService } from '../services/vehicle.service';
 import { ListVehicleComponent } from '../vehicle/list-vehicle.component';
-import { VehicleDetailComponent } from '../vehicle/vehicle-detail.component';
 import { AppErrorHandler } from './app.error-handler';
 
 @NgModule({
@@ -20,7 +19,6 @@ import { AppErrorHandler } from './app.error-handler';
     HomeComponent,
     NavigationComponent,
     EditVehicleComponent,
-    VehicleDetailComponent,
     ListVehicleComponent
   ],
   imports: [

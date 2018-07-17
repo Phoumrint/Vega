@@ -24,27 +24,29 @@ class ListVehicles extends Component {
         return (
             <div className="container">
                 <h1>Vehicles</h1>
-                <table class="table table-sm table-striped">
-                    <tr>
-                        <th>Id</th>
-                        <th>Make</th>
-                        <th>Model</th>
-                        <th>Contact Name</th>
-                        <th></th>
-                    </tr>
-                    { this.state.vehicles.map(
-                        vehicle => 
+                <table className="table table-sm table-striped">
+                    <tbody>
                         <tr>
-                            <td>{vehicle.id}</td>
-                            <td>{vehicle.make.name}</td>
-                            <td>{vehicle.model.name}</td>
-                            <td>{vehicle.contact.name}</td>
-                            <td>
-                                <Link to={`/vehicles/${vehicle.id}`}>Edit</Link>
-                            </td>
+                            <th>Id</th>
+                            <th>Make</th>
+                            <th>Model</th>
+                            <th>Contact Name</th>
+                            <th></th>
                         </tr>
-                    )}
-                 </table>
+                        { this.state.vehicles.map(
+                            vehicle => 
+                            <tr key={vehicle.id}>
+                                <td>{vehicle.id}</td>
+                                <td>{vehicle.make.name}</td>
+                                <td>{vehicle.model.name}</td>
+                                <td>{vehicle.contact.name}</td>
+                                <td>
+                                    <Link to={`/vehicles/${vehicle.id}`}>Edit</Link>
+                                </td>
+                            </tr>
+                        )}
+                   </tbody>
+                </table>
             </div>
         );
     }
