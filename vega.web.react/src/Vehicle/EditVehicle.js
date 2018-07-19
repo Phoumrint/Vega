@@ -11,7 +11,10 @@ class EditVehicle extends Component {
             makes: [],
             models: [],
             features: [],
-            saveVehicle: {}
+            saveVehicle: {
+                featureIds: [],
+                contact: {}
+            }
         };
         this.state.makeUrl = this.state.baseUrl + '/api/makes';
         this.state.modelUrl = this.state.baseUrl + '/api/models';
@@ -34,6 +37,7 @@ class EditVehicle extends Component {
           this.setState({features: features});
         });
 
+        // Load and display vehicle if Id is specified
         if (this.state.id) {
             const vehicleUrl =  `${this.state.vehiclesUrl}/${this.state.id}`;
 
@@ -43,7 +47,6 @@ class EditVehicle extends Component {
                 const saveVehicle = this.getSaveVehicle(vehicle);
                 this.setState({saveVehicle: saveVehicle});
             });
-    
         }
     }
 
@@ -61,19 +64,64 @@ class EditVehicle extends Component {
     onChange = (event) => {
         const name = event.target.name;
         const val = event.target.value;
-        console.log('Name', name);
-        console.log('Value', val);
-        console.log('this', this);
+
+        this.setState((prevState, props) => {
+            // Clone a copy of vehicle
+            let saveVehicle = this.copyVehicle(prevState.saveVehicle);
+            saveVehicle[name] = val;
+            return {
+                saveVehicle: saveVehicle
+            };
+        });
     }
 
     onMakeChange = (event) => {
+        this.onChange(event);
         const makeId = event.target.value;
+         // eslint-disable-next-line 
         const selectedMake = this.state.makes.find(make => makeId == make.id);
         if (selectedMake) {
             this.setState({models: selectedMake.models});
         } else {
             this.setState({models: []});
         }
+    }
+
+    onFeatureChange = (event) => {
+        const options = event.target.options;
+
+        this.setState((prevState) => {
+            let saveVehicle = this.copyVehicle(prevState.saveVehicle);
+            saveVehicle.featureIds = [];
+            let len = options.length;
+            for (let i = 0; i < len; i++) 
+            {
+                let option = options[i];
+                if (option.selected) {
+                    saveVehicle.featureIds.push(option.value);
+                }
+            }
+            return {
+                saveVehicle: saveVehicle
+            };
+        });
+    }
+
+    onContactChange = (event) => {
+        const name = event.target.name;
+        const val = event.target.value;
+
+        this.setState((prevState) => {
+            let saveVehicle =  this.copyVehicle(prevState.saveVehicle);
+            saveVehicle.contact[name] = val;
+            return {
+                saveVehicle: saveVehicle
+            };
+        });
+    }
+
+    copyVehicle(vehicle) {
+        return JSON.parse(JSON.stringify(vehicle));
     }
 
     render() {
@@ -83,8 +131,8 @@ class EditVehicle extends Component {
                     <h3 className="mb-3">Edit Vehicle</h3>
                     <form>
                         <div className="form-group">
-                            <label className="control-label" htmlFor="make">Make</label>
-                            <select className="form-control" name="make" required onChange={this.onMakeChange}>
+                            <label className="control-label" htmlFor="makeId">Make</label>
+                            <select className="form-control" name="makeId" required onChange={this.onMakeChange}>
                                 <option value=""></option>
                                 { this.state.makes.map(
                                     make => 
@@ -93,8 +141,8 @@ class EditVehicle extends Component {
                             </select>
                         </div>
                         <div className="form-group">
-                            <label className="control-label" htmlFor="model">Model</label>
-                            <select className="form-control" name="model" required>
+                            <label className="control-label" htmlFor="modelId">Model</label>
+                            <select className="form-control" name="modelId" required onChange={this.onChange}>
                                 <option value=""></option>
                                 { this.state.models.map(
                                     model => 
@@ -104,12 +152,12 @@ class EditVehicle extends Component {
                         </div>
                         <div className="form-group">
                             <label className="control-label">Is this vehicle registered?</label>
-                            <label><input type="radio" name="register" />Yes</label>
-                            <label><input type="radio" name="register" />No</label>
+                            <label><input type="radio" name="registered" value='true' onChange={this.onChange}/>Yes</label>
+                            <label><input type="radio" name="registered" value='false' onChange={this.onChange}/>No</label>
                         </div>
                         <div className="form-group">
-                            <label className="control-label" htmlFor="features">Features</label>
-                            <select name="features" className="form-control" multiple size='5'>
+                            <label className="control-label" htmlFor="featureIds">Features</label>
+                            <select name="featureIds" className="form-control" multiple size='5' onChange={this.onFeatureChange}>
                                 { this.state.features.map(
                                     feature => 
                                     <option key={feature.id} value={feature.id}>{feature.name}</option>
@@ -117,21 +165,25 @@ class EditVehicle extends Component {
                             </select>
                         </div>
                         <div className="form-group">
-                            <label className="control-label" htmlFor="contactName">Contact Name</label>
-                            <input type="text" name="contactName" className="form-control" required />
+                            <label className="control-label" htmlFor="name">Contact Name</label>
+                            <input type="text" name="name" className="form-control" required onChange={this.onContactChange}/>
                         </div>
                         <div className="form-group">
-                            <label className="control-label" htmlFor="contactPhone">Contact Phone</label>
-                            <input type="tel" name="contactPhone" className="form-control" required />
+                            <label className="control-label" htmlFor="phone">Contact Phone</label>
+                            <input type="tel" name="phone" className="form-control" required onChange={this.onContactChange}/>
                         </div>
                         <div className="form-group">
-                            <label className="control-label" htmlFor="contactEmail">Contact Email</label>
-                            <input type="email" name="contactEmail" className="form-control" onChange={this.onChange} />
+                            <label className="control-label" htmlFor="email">Contact Email</label>
+                            <input type="email" name="email" className="form-control" onChange={this.onContactChange} />
                         </div>
                         <div>
                             <button type="button" className='btn btn-primary' onClick={this.onSubmit}>Save</button>
                             <span> </span>
-                            <button type="button" className='btn btn-danger' onClick={this.onDelete}>Delete</button>
+                            { 
+                                this.state.id ?
+                                <button type="button" className='btn btn-danger' onClick={this.onDelete}>Delete</button>
+                                : null
+                            }
                         </div>
                     </form>
                 </section>
