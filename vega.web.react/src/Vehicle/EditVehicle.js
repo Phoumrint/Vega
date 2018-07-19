@@ -1,13 +1,14 @@
 import React, {Component} from 'react';
+import {Redirect} from 'react-router-dom';
+import HttpStatus from 'http-status-codes';
 
 class EditVehicle extends Component {
     constructor(props) {
         super();
         this.state = {
+            id: props.match.params.id,
             baseUrl: 'http://localhost:5000',
-            makeUrl: '',
-            featureUrl: '',
-            vehiclesUrl: '',
+            goback: false,
             makes: [],
             models: [],
             features: [],
@@ -16,22 +17,20 @@ class EditVehicle extends Component {
                 contact: {}
             }
         };
-        this.state.makeUrl = this.state.baseUrl + '/api/makes';
-        this.state.modelUrl = this.state.baseUrl + '/api/models';
-        this.state.featureUrl = this.state.baseUrl + '/api/features';
-        this.state.vehiclesUrl = this.state.vehicleUrl + '/api/vehicles';
     }
 
     componentDidMount() {
         // Load makes
-        fetch(this.state.makeUrl)
+        const makeUrl  = this.state.baseUrl + '/api/makes';
+        fetch(makeUrl)
         .then(resp => resp.json())
         .then(makes => {
           this.setState({makes: makes});
         });
  
         // Load features
-        fetch(this.state.featureUrl)
+        const featureUrl = this.state.baseUrl + '/api/features';
+        fetch(featureUrl)
         .then(resp => resp.json())
         .then(features => {
           this.setState({features: features});
@@ -39,8 +38,7 @@ class EditVehicle extends Component {
 
         // Load and display vehicle if Id is specified
         if (this.state.id) {
-            const vehicleUrl =  `${this.state.vehiclesUrl}/${this.state.id}`;
-
+            const vehicleUrl =  `${this.state.baseUrl}/api/vehicles/${this.state.id}`;
             fetch(vehicleUrl)
             .then(resp => resp.json())
             .then(vehicle => {
@@ -51,14 +49,16 @@ class EditVehicle extends Component {
     }
 
     getSaveVehicle(vehicle) {
-        console.log('Loaded Vehicle', vehicle);
-    }
+        let saveVehicle = {
+            id: vehicle.id,
+            makeId: vehicle.make.id,
+            modelId: vehicle.model.id,
+            registered: vehicle.registered,
+            contact: vehicle.contact
+        };
+        saveVehicle.featureIds = vehicle.features.map(feature => feature.id);
 
-    onSubmit = () => {
-        console.log('SaveVehicle', this.state.saveVehicle);
-    }
-
-    onDelete()  {
+        return saveVehicle;
     }
 
     onChange = (event) => {
@@ -124,7 +124,43 @@ class EditVehicle extends Component {
         return JSON.parse(JSON.stringify(vehicle));
     }
 
+    onSubmit = () => {
+        const url = `${this.state.baseUrl}/api/vehicles`;
+        const bodyContent = JSON.stringify(this.state.saveVehicle);
+        console.log('save body', bodyContent);
+        fetch(url, {
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            body: bodyContent
+        })
+        .then(response => {
+            if (response.status === HttpStatus.OK) {
+                console.log('Save was successful');
+                this.setState({goback: true});
+            }
+            else {
+                console.log('Save status', response.status);
+            }
+        })
+    }
+
+    onDelete = () =>  {
+        const url = `${this.state.baseUrl}/api/vehicles/${this.state.saveVehicle.id}`;
+        fetch(url, {
+            method: 'delete'
+        })
+        .then(response => {
+            if (response.status === HttpStatus.OK) {
+                this.setState({goback: true});
+            }
+        })
+    }
+
+
     render() {
+        if (this.state.goback) {
+            return(<Redirect to="/vehicles" />);
+        }
         return (
             <div>
                 <section className="mt-5 w-50">
@@ -132,7 +168,9 @@ class EditVehicle extends Component {
                     <form>
                         <div className="form-group">
                             <label className="control-label" htmlFor="makeId">Make</label>
-                            <select className="form-control" name="makeId" required onChange={this.onMakeChange}>
+                            <select className="form-control" name="makeId" required
+                                value={this.state.saveVehicle.makeId}
+                                onChange={this.onMakeChange}>
                                 <option value=""></option>
                                 { this.state.makes.map(
                                     make => 
@@ -142,7 +180,9 @@ class EditVehicle extends Component {
                         </div>
                         <div className="form-group">
                             <label className="control-label" htmlFor="modelId">Model</label>
-                            <select className="form-control" name="modelId" required onChange={this.onChange}>
+                            <select className="form-control" name="modelId" required 
+                                value={this.state.saveVehicle.modelId}
+                                onChange={this.onChange}>
                                 <option value=""></option>
                                 { this.state.models.map(
                                     model => 
@@ -152,12 +192,14 @@ class EditVehicle extends Component {
                         </div>
                         <div className="form-group">
                             <label className="control-label">Is this vehicle registered?</label>
-                            <label><input type="radio" name="registered" value='true' onChange={this.onChange}/>Yes</label>
-                            <label><input type="radio" name="registered" value='false' onChange={this.onChange}/>No</label>
+                            <label><input type="radio" name="registered" value={true} onChange={this.onChange}/>Yes</label>
+                            <label><input type="radio" name="registered" value={false} onChange={this.onChange}/>No</label>
                         </div>
                         <div className="form-group">
                             <label className="control-label" htmlFor="featureIds">Features</label>
-                            <select name="featureIds" className="form-control" multiple size='5' onChange={this.onFeatureChange}>
+                            <select name="featureIds" className="form-control" multiple size='5' 
+                                value={this.state.saveVehicle.featureIds}
+                                onChange={this.onFeatureChange}>
                                 { this.state.features.map(
                                     feature => 
                                     <option key={feature.id} value={feature.id}>{feature.name}</option>
@@ -166,15 +208,21 @@ class EditVehicle extends Component {
                         </div>
                         <div className="form-group">
                             <label className="control-label" htmlFor="name">Contact Name</label>
-                            <input type="text" name="name" className="form-control" required onChange={this.onContactChange}/>
+                            <input type="text" name="name" className="form-control" required 
+                                value={this.state.saveVehicle.contact.name}
+                                onChange={this.onContactChange}/>
                         </div>
                         <div className="form-group">
                             <label className="control-label" htmlFor="phone">Contact Phone</label>
-                            <input type="tel" name="phone" className="form-control" required onChange={this.onContactChange}/>
+                            <input type="tel" name="phone" className="form-control" required
+                                value={this.state.saveVehicle.contact.phone}
+                                onChange={this.onContactChange}/>
                         </div>
                         <div className="form-group">
                             <label className="control-label" htmlFor="email">Contact Email</label>
-                            <input type="email" name="email" className="form-control" onChange={this.onContactChange} />
+                            <input type="email" name="email" className="form-control" 
+                                value={this.state.saveVehicle.contact.email}
+                                onChange={this.onContactChange} />
                         </div>
                         <div>
                             <button type="button" className='btn btn-primary' onClick={this.onSubmit}>Save</button>
