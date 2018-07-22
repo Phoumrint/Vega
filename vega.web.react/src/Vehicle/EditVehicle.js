@@ -13,42 +13,48 @@ class EditVehicle extends Component {
             models: [],
             features: [],
             saveVehicle: {
+                makeId: "",
+                modelId: "",
+                registered: false,
                 featureIds: [],
-                contact: {}
+                contact: {
+                    name: "",
+                    phone: "",
+                    email: ""
+                }
             }
         };
     }
 
     componentDidMount() {
-        // Load makes
-        const makeUrl  = this.state.baseUrl + '/api/makes';
-        fetch(makeUrl)
-        .then(resp => resp.json())
-        .then(makes => {
-          this.setState({makes: makes});
-        });
- 
-        // Load features
-        const featureUrl = this.state.baseUrl + '/api/features';
-        fetch(featureUrl)
-        .then(resp => resp.json())
-        .then(features => {
-          this.setState({features: features});
-        });
-
-        // Load and display vehicle if Id is specified
+        // Create multiple requests
+        let requests = [
+            fetch(this.state.baseUrl + '/api/makes'),
+            fetch(this.state.baseUrl + '/api/features')
+        ];
         if (this.state.id) {
-            const vehicleUrl =  `${this.state.baseUrl}/api/vehicles/${this.state.id}`;
-            fetch(vehicleUrl)
-            .then(resp => resp.json())
-            .then(vehicle => {
-                const saveVehicle = this.getSaveVehicle(vehicle);
-                this.setState({saveVehicle: saveVehicle});
-            });
+            requests.push(fetch(`${this.state.baseUrl}/api/vehicles/${this.state.id}`));
         }
+
+        // Fetch multiple requests
+        Promise.all(requests)
+        .then(responses => Promise.all(responses.map(resp => resp.json())))
+        .then(data => {
+            let state = {
+                makes: data[0],
+                features: data[1]
+            };
+            if (this.state.id) {
+                state.saveVehicle = this.mapToSaveVehicle(data[2]);
+                state.models = this.getModels(state.makes, state.saveVehicle.makeId);
+                this.setState(state);
+            } else {
+                this.setState(state);
+            }
+        });
     }
 
-    getSaveVehicle(vehicle) {
+    mapToSaveVehicle(vehicle) {
         let saveVehicle = {
             id: vehicle.id,
             makeId: vehicle.make.id,
@@ -75,16 +81,28 @@ class EditVehicle extends Component {
         });
     }
 
+    copyVehicle(vehicle) {
+        return JSON.parse(JSON.stringify(vehicle));
+    }
+
     onMakeChange = (event) => {
         this.onChange(event);
+
         const makeId = event.target.value;
-         // eslint-disable-next-line 
-        const selectedMake = this.state.makes.find(make => makeId == make.id);
-        if (selectedMake) {
-            this.setState({models: selectedMake.models});
-        } else {
-            this.setState({models: []});
-        }
+        const models = this.getModels(this.state.makes, makeId);
+        this.setState({
+            models: models
+        });
+     }
+
+    getModels  = (makes, makeId) => {
+        // eslint-disable-next-line 
+       const selectedMake = makes.find(make => makeId == make.id);
+       if (selectedMake) {
+           return selectedMake.models;
+       } else {
+           return [];
+       }
     }
 
     onFeatureChange = (event) => {
@@ -107,6 +125,18 @@ class EditVehicle extends Component {
         });
     }
 
+    onRegisteredChange = (event) => {
+        const val = event.target.value;
+
+        this.setState((prevState) => {
+            let saveVehicle =  this.copyVehicle(prevState.saveVehicle);
+            saveVehicle.registered = val === "true";
+            return {
+                saveVehicle: saveVehicle
+            };
+        });
+    }
+
     onContactChange = (event) => {
         const name = event.target.name;
         const val = event.target.value;
@@ -120,22 +150,21 @@ class EditVehicle extends Component {
         });
     }
 
-    copyVehicle(vehicle) {
-        return JSON.parse(JSON.stringify(vehicle));
-    }
-
-    onSubmit = () => {
-        const url = `${this.state.baseUrl}/api/vehicles`;
+     onSubmit = () => {
         const bodyContent = JSON.stringify(this.state.saveVehicle);
-        console.log('save body', bodyContent);
+        let url = `${this.state.baseUrl}/api/vehicles`;
+        let method = 'post';
+        if (this.state.saveVehicle.id) {
+            url = `${this.state.baseUrl}/api/vehicles/${this.state.saveVehicle.id}`;
+            method = 'put';
+        }
         fetch(url, {
-            method: 'post',
+            method: method,
             headers: {'Content-Type': 'application/json'},
             body: bodyContent
         })
         .then(response => {
             if (response.status === HttpStatus.OK) {
-                console.log('Save was successful');
                 this.setState({goback: true});
             }
             else {
@@ -192,8 +221,8 @@ class EditVehicle extends Component {
                         </div>
                         <div className="form-group">
                             <label className="control-label">Is this vehicle registered?</label>
-                            <label><input type="radio" name="registered" value={true} onChange={this.onChange}/>Yes</label>
-                            <label><input type="radio" name="registered" value={false} onChange={this.onChange}/>No</label>
+                            <label><input type="radio" name="registered" value={true} checked={this.state.saveVehicle.registered} onChange={this.onRegisteredChange}/>Yes</label>
+                            <label><input type="radio" name="registered" value={false} checked={!this.state.saveVehicle.registered} onChange={this.onRegisteredChange}/>No</label>
                         </div>
                         <div className="form-group">
                             <label className="control-label" htmlFor="featureIds">Features</label>
