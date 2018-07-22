@@ -12,6 +12,8 @@ class EditVehicle extends Component {
             makes: [],
             models: [],
             features: [],
+
+            // Vehicle data
             saveVehicle: {
                 makeId: "",
                 modelId: "",
@@ -71,18 +73,12 @@ class EditVehicle extends Component {
         const name = event.target.name;
         const val = event.target.value;
 
-        this.setState((prevState, props) => {
-            // Clone a copy of vehicle
-            let saveVehicle = this.copyVehicle(prevState.saveVehicle);
-            saveVehicle[name] = val;
+        this.setState((prevState) => {
+            prevState.saveVehicle[name] = val;
             return {
-                saveVehicle: saveVehicle
+                saveVehicle: prevState.saveVehicle
             };
         });
-    }
-
-    copyVehicle(vehicle) {
-        return JSON.parse(JSON.stringify(vehicle));
     }
 
     onMakeChange = (event) => {
@@ -109,18 +105,17 @@ class EditVehicle extends Component {
         const options = event.target.options;
 
         this.setState((prevState) => {
-            let saveVehicle = this.copyVehicle(prevState.saveVehicle);
-            saveVehicle.featureIds = [];
+            prevState.saveVehicle.featureIds = [];
             let len = options.length;
             for (let i = 0; i < len; i++) 
             {
                 let option = options[i];
                 if (option.selected) {
-                    saveVehicle.featureIds.push(option.value);
+                    prevState.saveVehicle.featureIds.push(option.value);
                 }
             }
             return {
-                saveVehicle: saveVehicle
+                saveVehicle: prevState.saveVehicle
             };
         });
     }
@@ -129,10 +124,9 @@ class EditVehicle extends Component {
         const val = event.target.value;
 
         this.setState((prevState) => {
-            let saveVehicle =  this.copyVehicle(prevState.saveVehicle);
-            saveVehicle.registered = val === "true";
+            prevState.saveVehicle.registered = val === "true";
             return {
-                saveVehicle: saveVehicle
+                saveVehicle: prevState.saveVehicle
             };
         });
     }
@@ -142,10 +136,9 @@ class EditVehicle extends Component {
         const val = event.target.value;
 
         this.setState((prevState) => {
-            let saveVehicle =  this.copyVehicle(prevState.saveVehicle);
-            saveVehicle.contact[name] = val;
+            prevState.saveVehicle.contact[name] = val;
             return {
-                saveVehicle: saveVehicle
+                saveVehicle: prevState.saveVehicle
             };
         });
     }
