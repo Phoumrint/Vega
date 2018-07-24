@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 
+// Component for editing make and model of a vehicle
 class EditMakeModel extends Component {
     constructor(props) {
         super();
@@ -15,6 +16,7 @@ class EditMakeModel extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
+        // Updates a list of vehicle models when make is selected
         if (prevProps.makeId !== this.state.makeId) {
             let models = this.getModels(this.state.makes, this.state.makeId);
             this.setState({
@@ -24,6 +26,9 @@ class EditMakeModel extends Component {
     }
 
     static getDerivedStateFromProps(props, state) {
+        // Updates makeId, modelId, and a list of makes in the component state if they were
+        // changed in parent component.
+        // The UI will be updated as the result of the changes.
         if (state.makes !== props.makes ||
             state.makeId !== props.makeId || state.modelId !== props.modelId) {
             return {
@@ -35,6 +40,8 @@ class EditMakeModel extends Component {
         return null;
     }
 
+    // Event handler when make is selected.
+    // Updates a list of models for the selected make.
     onMakeChange = (event) => {
         const makeId = event.target.value;
         this.state.updateState('makeId', makeId);
@@ -45,6 +52,7 @@ class EditMakeModel extends Component {
         });
      }
 
+    // Gets a list of models for the selected make.
     getModels  = (makes, makeId) => {
         // eslint-disable-next-line 
        const selectedMake = makes.find(make => makeId == make.id);
@@ -55,6 +63,7 @@ class EditMakeModel extends Component {
        }
     }
 
+    // Event handler when a model is selected.
     onModelChange = (event) => {
         const modelId = event.target.value;
         this.state.updateState('modelId', modelId);

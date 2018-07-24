@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 
+// Component for editing user contact
 class EditContact extends Component {
     constructor(props) {
         super();
@@ -21,6 +22,7 @@ class EditContact extends Component {
         return null;
     }
 
+    // Event handler when a contact field is changed
     onContactChange = (event) => {
         const name = event.target.name;
         const val = event.target.value;

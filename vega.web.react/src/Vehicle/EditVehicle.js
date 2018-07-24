@@ -6,6 +6,7 @@ import EditMakeModel from './EditMakeModel';
 import EditFeatures from './EditFeatures';
 import EditContact from './EditContact';
 
+// Component for creating or editing a vehicle
 class EditVehicle extends Component {
     constructor(props) {
         super();
@@ -54,6 +55,7 @@ class EditVehicle extends Component {
         });
     }
 
+    // Updates vehicle data from the database in the component state
     updateVehicleState(state, vehicle) {
         state.id = vehicle.id;
         state.makeId = vehicle.make.id;
@@ -63,6 +65,7 @@ class EditVehicle extends Component {
         state.featureIds = vehicle.features.map(feature => feature.id);
     }
 
+    // Gets vehicle data from component state for saving to the database.
     getVehicleForSaving = () => {
         let state = this.state;
         let vehicle = {
@@ -77,10 +80,12 @@ class EditVehicle extends Component {
         return vehicle;
     }
 
+    // Function for a child component to update a property value in parent state
     updateState = (name, data) => {
         this.setState({[name]: data});
     }
 
+    // Handler for change in radio buttons to update whether vehicle is registered
     onRegisteredChange = (event) => {
         let registered = event.target.value === "true";
         this.setState({
@@ -88,6 +93,9 @@ class EditVehicle extends Component {
         });
     }
 
+    // Submit handler for saving data to the database.
+    // For a vehicle with no id, the submit will be to create a new vehicle in the database.
+    // For a vehicle with id, the submit is to update an exisiting vehicle in the database.
     onSubmit = () => {
         const vehicle = this.getVehicleForSaving();
         const bodyContent = JSON.stringify(vehicle);
@@ -112,6 +120,7 @@ class EditVehicle extends Component {
         })
     }
 
+    // Deletes a vehicle from the database.
     onDelete = () =>  {
         const url = `${this.state.baseUrl}/api/vehicles/${this.state.id}`;
         fetch(url, {
@@ -124,7 +133,7 @@ class EditVehicle extends Component {
         })
     }
 
-
+    // For rendering the editing vehicle form.
     render() {
         if (this.state.goback) {
             return(<Redirect to="/vehicles" />);

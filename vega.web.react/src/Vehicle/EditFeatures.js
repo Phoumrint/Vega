@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 
+// Component for selecting vehicle features
 class EditFeatures extends Component {
     constructor(props) {
         super();
@@ -13,6 +14,9 @@ class EditFeatures extends Component {
     }
 
     static getDerivedStateFromProps(props, state) {
+        // Updates feature Ids and features in the component state if they were
+        // changed in the parent component (after retrieving vehicle data).
+        // The UI will be updated as the result of the changes.
         if (state.features !== props.features || state.featureIds !== props.featureIds) {
             return {
                 features: props.features,
@@ -22,6 +26,7 @@ class EditFeatures extends Component {
         return null;
     }
 
+    // Event handler when the user makes vehicle feature selection
     onFeatureChange = (event) => {
         const options = event.target.options;
 
