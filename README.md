@@ -30,4 +30,4 @@ From Visual Studio Code
 - From the second terminal, change directory to Vega.Web.Angular or Vega.Web.React
 - Enter "npm install"
 - Enter "npm start"
-- Open a web browser and navigate to "http://localhost:4200"
+- Open a web browser and navigate to "http://localhost:4200" for Angular or "http://localhost:3000" for React.
